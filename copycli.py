@@ -16,6 +16,7 @@ def getcli(n):
     tk = Tk()
     out = []
 
+    out.append(str(n))
     def ctrlv():
         global LAST_VAL
         nonlocal tk, out
