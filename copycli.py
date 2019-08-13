@@ -1,11 +1,12 @@
 from time import sleep
 from pyautogui import click, hotkey, keyDown, keyUp, dragTo, press, typewrite
-from tkinter import Tk
+from tkinter import Tk, TclError
 import sys
 
+LAST_VAL = ""
 
 def getfield(x1, x2, y):
-    dt = 0.3
+    dt = 0.15
     click(x2, y)
     dragTo(x1, y, dt, button="left")
     hotkey("ctrl", "c")
@@ -16,9 +17,17 @@ def getcli(n):
     out = []
 
     def ctrlv():
+        global LAST_VAL
         nonlocal tk, out
-        out.append(tk.selection_get(selection="CLIPBOARD").strip())
-        tk.clipboard_clear()
+        try:
+            val = tk.selection_get(selection="CLIPBOARD").strip()
+            if val == LAST_VAL:
+                val = ""
+            out.append(val)
+            LAST_VAL = val
+        except TclError:
+            print("nothing to copy")
+        
         
     # row y-coords
     r1 = 140
@@ -78,8 +87,11 @@ def getcli(n):
 
 if __name__ == "__main__":
     fname = sys.argv[1]
-    with open(fname) as f:
+    outname = sys.argv[2]
+    input("Bring Cliente to front and press Enter")
+    with open(fname) as f, open(outname, 'w', encoding="utf-8") as o:
         for line in f:
             line = line.strip()
+            print(line)
             if len(line) > 0:
-                print(line.strip())
+                print(getcli(line), file=o)
